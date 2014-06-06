@@ -1,0 +1,154 @@
+Public	
+	Procedure koneksiTbl;
+	Procedure tampildata;
+  	Procedure bersih;
+end;
+
+
+// LISTING KONEKSI TABEL
+
+procedure TForm_Barang.koneksiTbl;
+begin
+    ADOQuery1.Connection :=ADOConnection1;
+    ADOQuery1.SQL.Clear;
+    ADOQuery1.SQL.Text :='SELECT * FROM tblbarang ORDER BY NamaBarang ASC';
+    ADOQuery1.Close;
+    ADOQuery1.Open;
+    DataSource1.DataSet :=ADOQuery1;
+    DBGrid1.DataSource := DataSource1;
+end;
+
+
+// LISTING TAMPIL DATA
+
+procedure TForm_Barang.tampildata;
+begin
+    if (ADOQuery1.RecordCount=0) then
+    begin
+         ShowMessage('Data Barang Kosong !!');
+         exit;
+    end
+    else
+        Edkode.Text   := ADOQuery1.FieldValues['KodeBrg'];
+        Edbarang.Text := ADOQuery1.FieldValues['NamaBarang'];
+        Edharga.Text  := ADOQuery1.FieldValues['Harga'];
+        Edstok.Text   := ADOQuery1.FieldValues['Stock'];
+
+end;
+
+
+//LISTING BERSIH
+
+procedure TForm_Barang.bersih;
+begin
+	Edkode.Clear;
+	Edbarang.Text := '';
+	Edharga.Text :='';
+	Edstok.Text :='';
+	Edcari.Text := '';
+end;
+
+
+//LISTING TOMBOL SIMPAN
+
+procedure TForm_Barang.Button2Click(Sender: TObject);
+begin
+if (Edkode.Text='')OR (Edbarang.Text ='') or (Edharga.Text='') then
+    begin
+    ShowMessage('Data Harus Diisi Lengkap !!');
+    exit;
+    end
+    else
+        ADOQuery1.SQL.Clear;
+        ADOQuery1.SQL.Text := 'SELECT * FROM TBLBARANG WHERE KODEBRG ='+QuotedStr(Edkode.Text);
+        ADOQuery1.Close;
+        ADOQuery1.Open;
+
+        IF (ADOQuery1.Recordset.RecordCount<>0) THEN
+        begin
+              ShowMessage('Data Barang Sudah Ada..');
+              koneksiTbl;
+              exit;
+        end
+        else
+              ADOQuery1.SQL.Clear;
+              ADOQuery1.SQL.Text :='INSERT INTO TBLBARANG VALUES('+
+                        QuotedStr(Edkode.Text)+','+
+                        QuotedStr(Edbarang.Text)+','+
+                        QuotedStr(Edharga.Text)+','+
+                        QuotedStr(Edstok.Text)+')';
+              ADOQuery1.ExecSQL;
+              koneksiTbl;     //untuk refresh
+              bersih;
+
+end;
+
+
+//LISTING TOMBOL EDIT
+
+procedure TForm_Barang.Button3Click(Sender: TObject);
+begin
+  if (edkode.Text='')or(edbarang.Text='')or(edharga.Text='')then
+    begin
+      ShowMessage('Pilih Data Yang Akan Diedit');
+      exit;
+    end
+    else
+    ADOQuery1.SQL.Clear;
+    ADOQuery1.SQL.Text:='UPDATE tblbarang SET NamaBarang='+QuotedStr(edbarang.Text)+','+
+                        'Harga  ='+QuotedStr(edharga.Text)+','+
+                        'Stock  ='+QuotedStr(Edstok.Text)+' WHERE KodeBrg='+
+                        QuotedStr(edkode.Text);
+    ADOQuery1.ExecSQL;
+    koneksiTbl;
+    bersih;
+end;
+
+
+//LISTING HAPUS
+
+procedure TForm_Barang.Button4Click(Sender: TObject);
+begin
+  if(Edkode.Text='')or(Edbarang.Text='')or(Edharga.Text='') then
+  begin
+    ShowMessage('Pilih Data Dulu Guys....');
+    exit;
+  end
+  else
+    ADOQuery1.SQL.Clear;
+    ADOQuery1.SQL.Text :='DELETE FROM tblbarang WHERE KodeBrg='+QuotedStr(Edkode.Text);
+    ADOQuery1.ExecSQL;
+    koneksiTbl;
+    bersih;
+end;
+
+
+// LISTING CARI
+
+procedure TForm_Barang.EdcariChange(Sender: TObject);
+begin
+  ADOQuery1.SQL.Clear;
+  ADOQuery1.SQL.Text :='SELECT * FROM tblbarang WHERE NamaBarang LIKE "%'+Edcari.Text+'%"';
+  ADOQuery1.Close;
+  ADOQuery1.Open;
+  tampildata;
+end;
+
+
+//LISTING TOMBOL BARU
+procedure TForm_Barang.Button1Click(Sender: TObject);
+begin
+	bersih;
+end;
+
+
+//LISTING TOMBOL KELUAR
+
+procedure TForm_Barang.btn_keluarClick(Sender: TObject);
+begin
+if(application.MessageBox('Apakah kamu yakin ingin keluar dari program ?','Konfirmasi',MB_YesNo)=ID_yes) then
+    begin
+      showmessage('Terimasih Sudah Menggunakan Program ini');
+      close
+    end;
+end;
