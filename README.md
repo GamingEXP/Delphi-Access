@@ -1,4 +1,4 @@
-Delphi-with-Mysql
+Delphi-with-Access
 =================
 
 {Simpan, Edit, Hapus }
